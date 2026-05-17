@@ -185,7 +185,7 @@ function TableDashSummary({ db, onOpenTool }) {
 /* ============================================================
    TABLE VIEW
    ============================================================ */
-function TableView({ db, setDb, user, onOpenTool, logEvent }) {
+function TableView({ db, saveField, user, onOpenTool }) {
   const [q, setQ] = useSV("");
   const [statusFilter, setStatusFilter] = useSV("all");
   const [certFilter, setCertFilter] = useSV("all");
@@ -232,20 +232,22 @@ function TableView({ db, setDb, user, onOpenTool, logEvent }) {
   const sortInd = (k) => sort.k !== k ? null : (sort.dir === "asc" ? "↑" : "↓");
 
   const startEdit = (id, field, value) => setEditing({ id, field, value });
-  const commitEdit = () => {
+  const commitEdit = async () => {
     if (!editing) return;
     const t = db.tools.find((x) => x.id === editing.id);
     if (!t) { setEditing(null); return; }
     if (t[editing.field] === editing.value) { setEditing(null); return; }
     const old = t[editing.field];
-    const nextTools = db.tools.map((x) => x.id === t.id ? { ...x, [editing.field]: editing.value, updatedAt: TV.now(), updatedBy: user.id } : x);
-    const nextDb = { ...db, tools: nextTools };
-    setDb(nextDb);
-    logEvent(nextDb, {
-      toolId: t.id, type: "edit", userId: user.id, at: TV.now(),
-      detail: { field: editing.field, oldValue: old, newValue: editing.value },
-    });
-    toast("Cambio guardado", "success");
+    try {
+      await saveField(t.id, { [editing.field]: editing.value });
+      await TV.logEvent({
+        toolId: t.id, type: "edit", userId: user.id, at: TV.now(),
+        detail: { field: editing.field, oldValue: old, newValue: editing.value },
+      });
+      toast("Cambio guardado", "success");
+    } catch (e) {
+      toast("Error al guardar", "error");
+    }
     setEditing(null);
   };
 

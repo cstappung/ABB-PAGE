@@ -350,18 +350,34 @@ function Select({ value, onChange, options }) {
 }
 
 /* ============================================================
-   PLACEHOLDER (for tool images)
+   PLACEHOLDER (for tool images — supports Firebase Storage URL)
    ============================================================ */
 function ToolImage({ tool, kind }) {
-  if (tool.img && tool.img.dataUrl) {
-    return <img src={tool.img.dataUrl} alt={tool.name}/>;
-  }
-  return <div className="ph"/>;
+  const src = tool.imgUrl || (tool.img && tool.img.dataUrl) || null;
+  if (src) return <img src={src} alt={tool.name} style={{ width:"100%", height:"100%", objectFit:"cover" }}/>;
+  return <div className="ph">{kind === "hero" ? "imagen referencial · 16:9" : "imagen"}</div>;
+}
+
+/* ============================================================
+   EVENT ICON + VERB (compartido por HistoryView y ToolDetail)
+   ============================================================ */
+function EventIcon({ type }) {
+  if (type === "create") return <Icon.Plus  size={12}/>;
+  if (type === "use")    return <Icon.User  size={11}/>;
+  if (type === "return") return <Icon.Check size={11}/>;
+  if (type === "cert")   return <Icon.Cert  size={11}/>;
+  if (type === "edit")   return <Icon.Edit  size={10}/>;
+  return <Icon.Clock size={11}/>;
+}
+function eventVerb(type) {
+  return { create:"creó", use:"tomó", return:"devolvió",
+           cert:"actualizó el certificado de", edit:"editó" }[type] || "modificó";
 }
 
 /* expose */
 Object.assign(window, {
   Icon, Avatar, StatusPill, CertBadge, Modal, Sheet, ConfirmModal,
   ToastProvider, useToast, FileDrop, Select, ToolImage,
+  EventIcon, eventVerb,
   fmtDate, fmtDateTime, fmtAgo, initials,
 });

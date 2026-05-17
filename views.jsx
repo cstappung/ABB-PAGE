@@ -2,6 +2,91 @@
    ============================================================ */
 const { useState: useSV, useMemo: useMV } = React;
 
+/* ============================================================
+   PRINT ALL QRs
+   Abre una ventana con todos los QR listos para imprimir y pegar
+   ============================================================ */
+function printQRSheet(tools, orgName) {
+  if (!tools || tools.length === 0) return;
+  const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, "");
+  const win = window.open("", "_blank", "width=900,height=700");
+  if (!win) return;
+
+  const items = tools.map((t) => ({
+    id: t.id, name: t.name, location: t.location || "",
+    url: `${baseUrl}?tool=${t.id}`,
+  }));
+
+  win.document.write(`<!doctype html><html><head>
+    <meta charset="utf-8"/>
+    <title>QR Herramientas · ${orgName || "Inventario"}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:Helvetica,Arial,sans-serif;background:#fff;padding:20px}
+      h1{font-size:14px;font-weight:600;color:#444;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px}
+      .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+      @media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}
+      .card{border:1.5px solid #e0e0e0;border-radius:10px;padding:12px;text-align:center;page-break-inside:avoid}
+      .qr{display:flex;justify-content:center;margin-bottom:8px}
+      .qr canvas,.qr img{width:120px!important;height:120px!important}
+      .name{font-size:11px;font-weight:700;color:#111;margin-bottom:3px;line-height:1.3;word-break:break-word}
+      .loc{font-size:9px;color:#777;margin-bottom:4px;line-height:1.3}
+      .url{font-size:7.5px;color:#bbb;word-break:break-all;border-top:1px solid #f0f0f0;padding-top:4px;margin-top:4px;font-family:monospace}
+      @media print{
+        body{padding:10px}
+        .card{border-color:#ccc}
+        button{display:none!important}
+      }
+    </style>
+  </head><body>
+    <h1>${orgName || "Inventario"} · ${items.length} herramienta${items.length!==1?"s":""}</h1>
+    <div style="margin-bottom:14px">
+      <button onclick="window.print()" style="background:#DA2128;color:#fff;border:0;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px">
+        Imprimir / Guardar PDF
+      </button>
+      <button onclick="window.close()" style="background:#f5f5f5;color:#333;border:1px solid #ddd;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer">
+        Cerrar
+      </button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <script>
+      const items = ${JSON.stringify(items)};
+      const grid = document.getElementById('grid');
+      items.forEach(function(item) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        var qrDiv = document.createElement('div');
+        qrDiv.className = 'qr';
+        var qrEl = document.createElement('div');
+        qrDiv.appendChild(qrEl);
+        card.appendChild(qrDiv);
+        var name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = item.name;
+        card.appendChild(name);
+        var loc = document.createElement('div');
+        loc.className = 'loc';
+        loc.textContent = item.location;
+        card.appendChild(loc);
+        var url = document.createElement('div');
+        url.className = 'url';
+        url.textContent = item.url;
+        card.appendChild(url);
+        grid.appendChild(card);
+        new QRCode(qrEl, {
+          text: item.url,
+          width: 120, height: 120,
+          colorDark: '#111111', colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      });
+    <\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+
 const STATUS_OPTIONS = ["Disponible", "En uso", "En mantenimiento", "Fuera de servicio"];
 
 /* ============================================================
@@ -503,8 +588,23 @@ function CertificatesView({ db, onOpenTool }) {
                   </div>
                 </div>
                 <div className="row">
-                  <button className="btn sm ghost" title="Ver"><Icon.Eye/></button>
-                  <button className="btn sm ghost" title="Descargar"><Icon.Download/></button>
+                  {c.fileUrl ? (
+                    <>
+                      <a href={c.fileUrl} target="_blank" rel="noreferrer"
+                        className="btn sm ghost" title="Ver certificado">
+                        <Icon.Eye/>
+                      </a>
+                      <a href={c.fileUrl} download={c.filename}
+                        className="btn sm ghost" title="Descargar">
+                        <Icon.Download/>
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <button className="btn sm ghost" disabled title="Sin archivo subido"><Icon.Eye/></button>
+                      <button className="btn sm ghost" disabled title="Sin archivo subido"><Icon.Download/></button>
+                    </>
+                  )}
                   <button className="btn sm" onClick={() => onOpenTool(c.toolId)}>Abrir herramienta</button>
                 </div>
               </div>

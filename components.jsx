@@ -132,9 +132,10 @@ const Icon = {
       <path d="M14.7 6.3a4 4 0 0 1 5.7 5.7l-8.5 8.5-5.7 1.4 1.4-5.7 8.5-8.5a4 4 0 0 1 0-1.4Z"/>
     </svg>
   ),
-  ArrowRight: (p) => (
-    <svg width={p.size || 14} height={p.size || 14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M5 12h14M13 5l7 7-7 7"/>
+  QR: (p) => (
+    <svg width={p.size || 16} height={p.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/>
+      <path d="M21 16h-3v3M18 21h3M14 3v3M14 8v1M14 14h1v1M8 14H3M8 18v3M3 14v5"/>
     </svg>
   ),
   QR: (p) => (
@@ -146,6 +147,11 @@ const Icon = {
   Print: (p) => (
     <svg width={p.size || 16} height={p.size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
       <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+    </svg>
+  ),
+  ArrowRight: (p) => (
+    <svg width={p.size || 14} height={p.size || 14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <path d="M5 12h14M13 5l7 7-7 7"/>
     </svg>
   ),
 };
